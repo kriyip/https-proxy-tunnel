@@ -1,11 +1,10 @@
 use std::collections::HashMap;
+use std::io::{Error, ErrorKind, Result};
+use std::net::IpAddr;
 use std::sync::{Arc, RwLock};
 use std::time::{Duration, Instant};
-use std::net::IpAddr;
-use trust_dns_resolver::TokioAsyncResolver;
 use trust_dns_resolver::config::*;
-use std::io::{Result, Error, ErrorKind};
-
+use trust_dns_resolver::TokioAsyncResolver;
 
 pub struct DNSRecord {
     ip: Vec<IpAddr>,
@@ -25,7 +24,11 @@ impl DNSResolver {
         Self {
             records: Arc::new(RwLock::new(HashMap::new())),
             ttl: Duration::from_secs(ttl),
-            tokio_resolver: TokioAsyncResolver::tokio(ResolverConfig::default(), ResolverOpts::default()).unwrap(),
+            tokio_resolver: TokioAsyncResolver::tokio(
+                ResolverConfig::default(),
+                ResolverOpts::default(),
+            )
+            .unwrap(),
         }
     }
 
@@ -41,10 +44,13 @@ impl DNSResolver {
 
     pub fn update_cache(&self, domain: &str, ip: Vec<IpAddr>) {
         let mut records = self.records.write().unwrap();
-        records.insert(domain.to_string(), DNSRecord {
-            ip: ip,
-            valid_until: Instant::now() + self.ttl,
-        });
+        records.insert(
+            domain.to_string(),
+            DNSRecord {
+                ip: ip,
+                valid_until: Instant::now() + self.ttl,
+            },
+        );
     }
 
     pub async fn cleanup_expired_records(&self) {
@@ -67,7 +73,7 @@ impl DNSResolver {
                     self.update_cache(domain, resolved_ips.clone());
                 }
                 Ok(resolved_ips)
-            },
+            }
             Err(err) => Err(Error::new(ErrorKind::Other, err)),
         }
     }
@@ -100,7 +106,10 @@ mod test {
 
         // Perform the second resolution, which should hit the cache.
         let second_resolution = dns_resolver.resolve_domain(domain).await.unwrap();
-        assert_eq!(first_resolution, second_resolution, "Subsequent resolutions should hit the cache");
+        assert_eq!(
+            first_resolution, second_resolution,
+            "Subsequent resolutions should hit the cache"
+        );
         assert_eq!(dns_resolver.check_cache(domain).unwrap(), second_resolution);
         assert_eq!(dns_resolver.records.read().unwrap().len(), 1);
 
@@ -113,7 +122,7 @@ mod test {
         let _third_resolution = dns_resolver.resolve_domain(domain).await.unwrap();
         assert_eq!(dns_resolver.records.read().unwrap().len(), 1);
     }
-    
+
     #[tokio::test]
     async fn test_failed_resolution() {
         let dns_resolver = DNSResolver::new(60);
@@ -147,8 +156,16 @@ mod test {
         assert_eq!(ips.len(), 10, "Should resolve to 10 IPs");
         println!("{:?}", ips);
         println!("len of ips: {}", ips.len());
-        assert_eq!(dns_resolver.check_cache(domain).unwrap(), ips[0], "All resolutions should hit the cache");
-        assert_eq!(dns_resolver.records.read().unwrap().len(), 1, "Should only have one entry in the cache");
+        assert_eq!(
+            dns_resolver.check_cache(domain).unwrap(),
+            ips[0],
+            "All resolutions should hit the cache"
+        );
+        assert_eq!(
+            dns_resolver.records.read().unwrap().len(),
+            1,
+            "Should only have one entry in the cache"
+        );
     }
 
     // test for big servers with multiple IPs
@@ -165,9 +182,12 @@ mod test {
                 dns_resolver.resolve_domain(&domain).await.unwrap()
             }));
         }
-        
+
         for handle in handles {
-            assert!(!handle.await.unwrap().is_empty(), "Should resolve to at least one IP");
+            assert!(
+                !handle.await.unwrap().is_empty(),
+                "Should resolve to at least one IP"
+            );
         }
     }
 
@@ -196,5 +216,4 @@ mod test {
         assert_eq!(dns_resolver.check_cache(domains[2]).unwrap(), ips[2]);
         assert_eq!(dns_resolver.records.read().unwrap().len(), 3);
     }
-
 }
