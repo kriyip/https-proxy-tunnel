@@ -1,0 +1,8 @@
+/Users/kristineyip/Documents/winter-2023_4 projects/http-tunnel-proxy/target/debug/deps/trust_dns_rustls-3602cae46e745c27.rmeta: /Users/kristineyip/.cargo/registry/src/index.crates.io-6f17d22bba15001f/trust-dns-rustls-0.20.4/src/lib.rs /Users/kristineyip/.cargo/registry/src/index.crates.io-6f17d22bba15001f/trust-dns-rustls-0.20.4/src/tls_client_stream.rs /Users/kristineyip/.cargo/registry/src/index.crates.io-6f17d22bba15001f/trust-dns-rustls-0.20.4/src/tls_server.rs /Users/kristineyip/.cargo/registry/src/index.crates.io-6f17d22bba15001f/trust-dns-rustls-0.20.4/src/tls_stream.rs
+
+/Users/kristineyip/Documents/winter-2023_4 projects/http-tunnel-proxy/target/debug/deps/trust_dns_rustls-3602cae46e745c27.d: /Users/kristineyip/.cargo/registry/src/index.crates.io-6f17d22bba15001f/trust-dns-rustls-0.20.4/src/lib.rs /Users/kristineyip/.cargo/registry/src/index.crates.io-6f17d22bba15001f/trust-dns-rustls-0.20.4/src/tls_client_stream.rs /Users/kristineyip/.cargo/registry/src/index.crates.io-6f17d22bba15001f/trust-dns-rustls-0.20.4/src/tls_server.rs /Users/kristineyip/.cargo/registry/src/index.crates.io-6f17d22bba15001f/trust-dns-rustls-0.20.4/src/tls_stream.rs
+
+/Users/kristineyip/.cargo/registry/src/index.crates.io-6f17d22bba15001f/trust-dns-rustls-0.20.4/src/lib.rs:
+/Users/kristineyip/.cargo/registry/src/index.crates.io-6f17d22bba15001f/trust-dns-rustls-0.20.4/src/tls_client_stream.rs:
+/Users/kristineyip/.cargo/registry/src/index.crates.io-6f17d22bba15001f/trust-dns-rustls-0.20.4/src/tls_server.rs:
+/Users/kristineyip/.cargo/registry/src/index.crates.io-6f17d22bba15001f/trust-dns-rustls-0.20.4/src/tls_stream.rs:
