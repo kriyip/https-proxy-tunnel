@@ -1,0 +1,71 @@
+name: Rust CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+        - name: Checkout code
+          uses: actions/checkout@v2
+  
+        - name: Set up Rust
+          uses: actions/setup-rust@v1
+          with:
+            rust-version: stable
+  
+        - name: Build and Test
+          run: |
+            cargo build --release
+            cargo test
+  
+        - name: Run Clippy
+          run: |
+            cargo install clippy --force
+            cargo clippy -- -D warnings
+  
+        - name: Format Code with Rustfmt
+          run: |
+            cargo install rustfmt --force
+            cargo fmt -- --check
+
+        - name: Check Security Vulnerabilities
+          run: |
+            cargo install cargo-audit --force
+            cargo audit
+    
+        - name: Generate Documentation
+          run: |
+            cargo doc --no-deps
+
+        - name: Check Documentation Build
+          run: |
+            cargo doc --no-deps --no-std
+
+        - name: Code Coverage
+          run: |
+            cargo install tarpaulin --force
+            cargo tarpaulin --out Xml
+
+  push_unit_tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Rust
+        uses: actions/setup-rust@v1
+        with:
+          rust-version: stable
+
+      - name: Build and Run Unit Tests
+        run: |
+          cargo test
