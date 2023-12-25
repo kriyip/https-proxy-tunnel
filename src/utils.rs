@@ -7,13 +7,19 @@ pub struct CLIConfig {
 
 // connection result
 pub enum TunnelConnectionResult {
-    Ok, // 200
-    BadRequest, // 400
-    Unauthorized, // 401
-    Forbidden, // 403
-    NotFound, // 404
-    RequestTimeout, // 408
+    Ok,                  // 200
+    BadRequest,          // 400
+    Unauthorized,        // 401
+    Forbidden,           // 403
+    NotFound,            // 404
+    RequestTimeout,      // 408
     InternalServerError, // 500
-    BadGateway, // 502
+    BadGateway,          // 502
     Error,
+}
+
+pub enum TunnelType {
+    TCP,
+    HTTP,
+    HTTPS,
 }
