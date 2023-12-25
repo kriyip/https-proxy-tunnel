@@ -32,7 +32,7 @@ async fn handle_tcp(mut client_socket: TcpStream) -> io::Result<()> {
     let mut buffer = [0; 1024];
     let n = client_socket.read(&mut buffer).await?;
 
-    if (n == 0) {
+    if n == 0 {
         return Ok(());
     }
 
@@ -69,9 +69,49 @@ async fn handle_tcp(mut client_socket: TcpStream) -> io::Result<()> {
     Ok(())
 }
 
-// handles an HTTP Connect request
-async fn handle_connect(mut client_socket: TcpStream) -> io::Result<()> {
-    unimplemented!()
+async fn handle_http_connect(mut client_socket: TcpStream) -> io::Result<()> {
+    // Read the HTTP CONNECT request
+    let mut buffer = [0; 1024];
+    let n = client_socket.read(&mut buffer).await?;
+
+    // Parse the request to get the target address
+    let request_str = std::str::from_utf8(&buffer[..n]).unwrap();
+    let target_address = parse_http_connect_request(request_str)
+        .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "Invalid HTTP CONNECT request"))?;
+
+    // Connect to the target server
+    let mut target_socket = TcpStream::connect(target_address).await?;
+
+    // Send successful response back to the client
+    client_socket.write_all(b"HTTP/1.1 200 Connection Established\r\n\r\n").await?;
+
+    // Relay data between client and target server
+    relay_data(client_socket, target_socket).await
+}
+
+// Function to parse the HTTP CONNECT request and extract the target address
+fn parse_http_connect_request(request: &str) -> Result<String, ()> {
+    request.lines()
+        .next()
+        .and_then(|line| line.split_whitespace().nth(1))
+        .map(|addr| addr.to_string())
+        .ok_or(())
+}
+
+// Function to relay data between client and target server
+async fn relay_data(mut client_socket: TcpStream, mut target_socket: TcpStream) -> io::Result<()> {
+    let (mut client_reader, mut client_writer) = client_socket.split();
+    let (mut server_reader, mut server_writer) = target_socket.split();
+
+    let client_to_server = io::copy(&mut client_reader, &mut server_writer);
+    let server_to_client = io::copy(&mut server_reader, &mut client_writer);
+
+    tokio::select! {
+        result = client_to_server => result?,
+        result = server_to_client => result?,
+    };
+
+    Ok(())
 }
 
 #[cfg(test)]
